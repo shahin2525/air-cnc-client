@@ -1,35 +1,35 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-
+import toast from "react-hot-toast";
 import { FcGoogle } from "react-icons/fc";
-import { useContext } from "react";
+import { useContext, useRef } from "react";
 import { AuthContext } from "../../providers/AuthProvider";
 import { TbFidgetSpinner } from "react-icons/tb";
-import { toast } from "react-hot-toast";
+import { saveUser } from "../../api/auth";
+
 const SignUp = () => {
+  const {
+    loading,
+    setLoading,
+    signInWithGoogle,
+    createUser,
+    updateUserProfile,
+  } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/";
-  const {
-    user,
-    loading,
-    setLoading,
-    createUser,
 
-    signInWithGoogle,
-
-    logOut,
-    updateUserProfile,
-  } = useContext(AuthContext);
-  // handle create user
-  const handleSignup = (event) => {
+  // Handle user registration
+  const handleSubmit = (event) => {
     event.preventDefault();
+    const name = event.target.name.value;
     const email = event.target.email.value;
     const password = event.target.password.value;
-    const name = event.target.name.value;
-    // image upload
+
+    // Image Upload
     const image = event.target.image.files[0];
     const formData = new FormData();
     formData.append("image", image);
+
     const url = `https://api.imgbb.com/1/upload?key=${
       import.meta.env.VITE_IMGBB_KEY
     }`;
@@ -39,52 +39,50 @@ const SignUp = () => {
     })
       .then((res) => res.json())
       .then((imageData) => {
-        console.log(imageData.data.display_url);
         const imageUrl = imageData.data.display_url;
-        createUser(email, password).then((result) => {
-          updateUserProfile(name, imageUrl)
-            .then(() => {
-              toast.success("sign up successful");
-              navigate(from, { replace: true });
-            })
-            .catch((error) => {
-              setLoading(false);
-              const message = error.message;
-              toast.error(message);
-            });
-        });
+
+        createUser(email, password)
+          .then((result) => {
+            updateUserProfile(name, imageUrl)
+              .then(() => {
+                toast.success("Signup successful");
+                saveUser(result.user);
+                navigate(from, { replace: true });
+              })
+              .catch((err) => {
+                setLoading(false);
+                console.log(err.message);
+                toast.error(err.message);
+              });
+          })
+          .catch((err) => {
+            setLoading(false);
+            console.log(err.message);
+            toast.error(err.message);
+          });
       })
-      .catch((error) => {
+      .catch((err) => {
         setLoading(false);
-        const message = error.message;
-        toast.error(message);
+        console.log(err.message);
+        toast.error(err.message);
       });
 
     return;
-    // createUser(email, password)
-    //   .then((result) => {
-    //     const user = result.user;
-    //     console.log(user);
-    //     navigate(from, { replace: true });
-    //   })
-    //   .catch((error) => {
-    //     setLoading(false);
-    //     const message = error.message;
-    //     toast.error(message);
-    //   });
   };
-  // google login
-  const handleGoogleLogin = () => {
+
+  // Handle google signin
+  const handleGoogleSignIn = () => {
     signInWithGoogle()
       .then((result) => {
-        const user = result.user;
-        console.log(user);
+        console.log(result.user);
+        // save user to db
+        saveUser(result.user);
         navigate(from, { replace: true });
       })
-      .catch((error) => {
+      .catch((err) => {
         setLoading(false);
-        const message = error.message;
-        toast.error(message);
+        console.log(err.message);
+        toast.error(err.message);
       });
   };
   return (
@@ -95,7 +93,7 @@ const SignUp = () => {
           <p className="text-sm text-gray-400">Welcome to AirCNC</p>
         </div>
         <form
-          onSubmit={handleSignup}
+          onSubmit={handleSubmit}
           noValidate=""
           action=""
           className="space-y-6 ng-untouched ng-pristine ng-valid"
@@ -163,7 +161,7 @@ const SignUp = () => {
               className="bg-rose-500 w-full rounded-md py-3 text-white"
             >
               {loading ? (
-                <TbFidgetSpinner className="animate-spin m-auto" size={24} />
+                <TbFidgetSpinner className="m-auto animate-spin" size={24} />
               ) : (
                 "Continue"
               )}
@@ -178,7 +176,7 @@ const SignUp = () => {
           <div className="flex-1 h-px sm:w-16 dark:bg-gray-700"></div>
         </div>
         <div
-          onClick={handleGoogleLogin}
+          onClick={handleGoogleSignIn}
           className="flex justify-center items-center space-x-2 border m-3 p-2 border-gray-300 border-rounded cursor-pointer"
         >
           <FcGoogle size={32} />

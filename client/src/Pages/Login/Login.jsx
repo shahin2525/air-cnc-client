@@ -1,70 +1,65 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-
+import toast from "react-hot-toast";
 import { FcGoogle } from "react-icons/fc";
 import { useContext, useRef } from "react";
 import { AuthContext } from "../../providers/AuthProvider";
-// import { toast } from "react-hot-toast";
-import { toast } from "react-hot-toast";
 import { TbFidgetSpinner } from "react-icons/tb";
+import { saveUser } from "../../api/auth";
+
 const Login = () => {
+  const { loading, setLoading, signIn, signInWithGoogle, resetPassword } =
+    useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
-  const emailRef = useRef();
   const from = location.state?.from?.pathname || "/";
-  const {
-    loading,
-    setLoading,
-
-    signIn,
-    signInWithGoogle,
-    resetPassword,
-  } = useContext(AuthContext);
-  // email and password login
-  const handleLogin = (event) => {
+  const emailRef = useRef();
+  // Handle submit
+  const handleSubmit = (event) => {
     event.preventDefault();
     const email = event.target.email.value;
     const password = event.target.password.value;
     signIn(email, password)
       .then((result) => {
-        const user = result.user;
-        console.log(user);
+        console.log(result.user);
         navigate(from, { replace: true });
       })
-      .catch((error) => {
+      .catch((err) => {
         setLoading(false);
-        const message = error.message;
-        toast.error(message);
+        console.log(err.message);
+        toast.error(err.message);
       });
   };
-  // google login
-  const handleGoogleLogin = () => {
+
+  // Handle google signin
+  const handleGoogleSignIn = () => {
     signInWithGoogle()
       .then((result) => {
-        const user = result.user;
-        console.log(user);
+        console.log(result.user.email);
+        // save user to db
+
+        saveUser(result.user);
         navigate(from, { replace: true });
       })
-      .catch((error) => {
+      .catch((err) => {
         setLoading(false);
-        const message = error.message;
-        toast.error(message);
+        console.log(err.message);
+        toast.error(err.message);
       });
   };
-  // handle password reset
-  const handlePasswordReset = () => {
-    // event.preventDefault();
-    // const email = event.target.email.value;
+
+  //   handle password reset
+  const handleReset = () => {
     const email = emailRef.current.value;
-    console.log(email);
+
     resetPassword(email)
       .then(() => {
         toast.success("Please check your email for reset link");
         setLoading(false);
       })
-      .catch((error) => {
+      .catch((err) => {
         setLoading(false);
-        const message = error.message;
-        toast.error(message);
+        console.log(err.message);
+        toast.error(err.message);
       });
   };
   return (
@@ -77,7 +72,7 @@ const Login = () => {
           </p>
         </div>
         <form
-          onSubmit={handleLogin}
+          onSubmit={handleSubmit}
           noValidate=""
           action=""
           className="space-y-6 ng-untouched ng-pristine ng-valid"
@@ -121,7 +116,7 @@ const Login = () => {
               className="bg-rose-500 w-full rounded-md py-3 text-white"
             >
               {loading ? (
-                <TbFidgetSpinner className="animate-spin m-auto" size={24} />
+                <TbFidgetSpinner className="m-auto animate-spin" size={24} />
               ) : (
                 "Continue"
               )}
@@ -130,7 +125,7 @@ const Login = () => {
         </form>
         <div className="space-y-1">
           <button
-            onClick={handlePasswordReset}
+            onClick={handleReset}
             className="text-xs hover:underline hover:text-rose-500 text-gray-400"
           >
             Forgot password?
@@ -144,7 +139,7 @@ const Login = () => {
           <div className="flex-1 h-px sm:w-16 dark:bg-gray-700"></div>
         </div>
         <div
-          onClick={handleGoogleLogin}
+          onClick={handleGoogleSignIn}
           className="flex justify-center items-center space-x-2 border m-3 p-2 border-gray-300 border-rounded cursor-pointer"
         >
           <FcGoogle size={32} />
