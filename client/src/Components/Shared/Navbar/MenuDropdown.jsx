@@ -10,7 +10,7 @@ import { toast } from "react-hot-toast";
 
 const MenuDropdown = () => {
   const { user, logOut, role, setRole } = useContext(AuthContext);
-  console.log(role);
+  console.log(role, user);
   const [isOpen, setIsOpen] = useState(false);
   const [modal, setModal] = useState(false);
   const modalHandler = (email) => {
@@ -31,10 +31,10 @@ const MenuDropdown = () => {
   return (
     <div className="relative">
       <div className="flex flex-row items-center gap-3">
-        <div className="hidden md:block text-sm font-semibold py-3 px-8 rounded-full transition ">
+        <div className="hidden md:block text-sm font-semibold rounded-full transition ">
           {!role && (
             <button
-              className="cursor-pointer hover:bg-neutral-100 py-3 px-4"
+              className="cursor-pointer hover:bg-neutral-100 py-3 px-4 text-sm font-semibold rounded-full"
               onClick={() => setModal(true)}
               disabled={!user}
             >
@@ -52,7 +52,7 @@ const MenuDropdown = () => {
         </div>
       </div>
       {isOpen && (
-        <div className="absolute rounded-xl shadow-md w-[40vw] md:w-3/4 bg-white overflow-hidden right-0 top-12 text-sm">
+        <div className="absolute rounded-xl shadow-md w-[40vw] md:w-[10vw] bg-white overflow-hidden right-0 top-12 text-sm">
           <div className="flex flex-col cursor-pointer">
             <Link
               to="/"

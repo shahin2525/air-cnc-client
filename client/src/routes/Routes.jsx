@@ -9,6 +9,9 @@ import Sidebar from "../Components/Dashboard/Sidebar";
 import AddRoom from "../Pages/Dashboard/AddRoom";
 import { getRoom } from "../api/rooms";
 import PrivateRoute from "./PrivateRoute";
+import MyBookings from "../Components/Dashboard/MyBookings";
+import MyListings from "../Components/Dashboard/MyListings";
+import ManageBookings from "../Pages/Dashboard/ManageBookings";
 
 export const router = createBrowserRouter([
   {
@@ -41,11 +44,27 @@ export const router = createBrowserRouter([
   },
   {
     path: "dashboard",
-    element: <DashboardLayout></DashboardLayout>,
+    element: (
+      <PrivateRoute>
+        <DashboardLayout></DashboardLayout>
+      </PrivateRoute>
+    ),
     children: [
       {
         path: "/dashboard/add-room",
         element: <AddRoom></AddRoom>,
+      },
+      {
+        path: "/dashboard/my-bookings",
+        element: <MyBookings></MyBookings>,
+      },
+      {
+        path: "/dashboard/my-listings",
+        element: <MyListings></MyListings>,
+      },
+      {
+        path: "/dashboard/manage-bookings",
+        element: <ManageBookings></ManageBookings>,
       },
     ],
   },

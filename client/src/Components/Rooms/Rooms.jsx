@@ -40,7 +40,7 @@ const Rooms = () => {
           ))}
         </div>
       ) : (
-        <div className="pt-10">
+        <div className="min-h-[calc(100vh-300px)] flex items-center justify-center">
           <Heading
             title="NO Rooms Available in this category"
             subtitle="Please Select Other Category"
